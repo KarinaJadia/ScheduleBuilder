@@ -6,7 +6,9 @@ import re # getting a little lost in the sauce with regex
 
 if __name__ == "__main__":
     url = 'https://catalog.uconn.edu/undergraduate/courses/#coursestext' # courses url
-    courses = [] 
+    courses = []
+
+    # this section is for reading the webpage and extracting the names
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -25,10 +27,12 @@ if __name__ == "__main__":
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
     
+    # this section is for saving the course codes
     with open('course_codes.txt', 'w') as file: # writes the course codes to a file
         for course in courses:
             match = re.search(r'\((.*?)\)', course)
             if match:
-                file.write(f'{match.group(1)}\n')
+                code = match.group(1)
+                file.write(f'{code}\n')
 
-    print(courses)
+    # print(courses)
