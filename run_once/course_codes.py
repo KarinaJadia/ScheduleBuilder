@@ -1,4 +1,4 @@
-# extracts list of classes and writes them to file
+# extracts list of classes and writes them to database
 
 import requests
 from bs4 import BeautifulSoup
@@ -45,22 +45,28 @@ def courseNames(url): # gets the course names
 
         match = re.match(r'^(.*?)\s*\(', course)  # gets everything before the (
         if match:
-            name = match.group(1).strip()  # Extract the part before '('
+            name = match.group(1).strip() 
 
         cursor.execute("INSERT OR REPLACE INTO Courses (CourseName, CourseCode) VALUES (?, ?)", [name, code])
     
     connection.commit()
     connection.close()
 
+    print('successfully populated courses table')
+
     return codes
 
 def codes(url): # gets the individual courses in each school
     codes = courseNames(url)
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    
     for code in codes:
         url = 'https://catalog.uconn.edu/undergraduate/courses/' + code.lower() + '/' # only works in lowercase
         print(f'doing {code}')
-        file = open("courses.txt", "w")
+
         try:
+            
             response = requests.get(url)
             response.raise_for_status()
 
@@ -72,10 +78,21 @@ def codes(url): # gets the individual courses in each school
             for link in course_links:
                 if code in link.text.strip() and re.search(r'\d', link.text.strip()):  # only taking courses with numbers
                     name = link.text.strip()
-                    file.write(f'{name}\n') # todo: save to sql file
+                    code = ''
+
+                    match = re.match(r'^(.*?)(?=\d)', name) # gets the letters before the code
+                    if match:
+                        code = match.group(1).strip()
+
+                    cursor.execute("INSERT OR REPLACE INTO CourseNames (CourseNum, CourseCode) VALUES (?, ?)", [name, code])
 
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
 
+    connection.commit()
+    connection.close()
+
+    print('successfully populated coursenames table')
+
 if __name__ == "__main__":
-    courseNames('https://catalog.uconn.edu/undergraduate/courses/#coursestext')
+    codes('https://catalog.uconn.edu/undergraduate/courses/#coursestext')
