@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"html/template"
 	"log"
+	"encoding/json"
 	"net/http"
 
 	_ "modernc.org/sqlite"
@@ -12,6 +13,11 @@ import (
 type Courses struct {
 	CourseName string
 	CourseCode string
+}
+
+type Classes struct {
+	ClassNum string
+	ClassCode string
 }
 
 // handler function for HTML page
@@ -39,18 +45,43 @@ func main() {
 		}
 		defer rows.Close()
 		
-		var data []Courses
+		var courses []Courses
 		for rows.Next() {
 			var d Courses
 			if err := rows.Scan(&d.CourseName, &d.CourseCode); err != nil {
-				http.Error(w, "Database scan error", http.StatusInternalServerError)
+				http.Error(w, "Database scan error: " + err.Error(), http.StatusInternalServerError)
 				return
 			}
-			data = append(data, d)
+			courses = append(courses, d)
 		}
 
+		rows, err = db.Query("SELECT ClassNum, ClassCode FROM Classes")
+		if err != nil {
+			http.Error(w, "Database query error: " + err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+		
+		var classes []Classes
+		for rows.Next() {
+			var d Classes
+			if err := rows.Scan(&d.ClassNum, &d.ClassCode); err != nil {
+				http.Error(w, "Database scan error: " + err.Error(), http.StatusInternalServerError)
+				return
+			}
+			classes = append(classes, d)
+		}
+
+		data := struct {
+			Courses []Courses
+			Classes []Classes
+		}{
+			Courses:  courses,
+			Classes: classes,
+		}	
+
 		if err := tmpl.Execute(w, data); err != nil {
-			http.Error(w, "Template execution error", http.StatusInternalServerError)
+			http.Error(w, "Template execution error: "+ err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})

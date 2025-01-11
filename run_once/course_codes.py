@@ -84,7 +84,7 @@ def codes(url): # gets the individual courses in each school
                     if match:
                         code = match.group(1).strip()
 
-                    cursor.execute("INSERT OR REPLACE INTO CourseNames (CourseNum, CourseCode) VALUES (?, ?)", [name, code])
+                    cursor.execute("INSERT OR REPLACE INTO Classes (ClassNum, ClassCode) VALUES (?, ?)", [name, code])
 
         except requests.exceptions.RequestException as e:
             print(f"An error occurred: {e}")
@@ -92,7 +92,7 @@ def codes(url): # gets the individual courses in each school
     connection.commit()
     connection.close()
 
-    print('successfully populated coursenames table')
+    print('successfully populated classes table')
 
 if __name__ == "__main__":
     codes('https://catalog.uconn.edu/undergraduate/courses/#coursestext')

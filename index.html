@@ -7,26 +7,49 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div>
-        <p>select your classes:</p>
-        <script src="/static/script.js"></script>
+    <script src="/static/script.js" type="text/javascript"></script>
 
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Code</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{range .}}
-                <tr>
-                    <td>{{.CourseName}}</td>
-                    <td>{{.CourseCode}}</td>
-                </tr>
-                {{end}}
-            </tbody>
-        </table>
+    <div>
+        <label for="courses">select a course:</label>
+        <select name="courses" id="courses" onchange="fetchClasses()">
+            {{range .Courses}}
+            <option id="CourseCode" value="{{.CourseCode}}">{{.CourseName}}</option>
+            {{end}}
+        </select>
     </div>
+    <div>
+        <label for="classes">select a class:</label>
+        <select name="classes" id="classes">
+            {{range .Classes}}
+            <option value="{{.ClassNum}}">{{.ClassNum}}</option>
+            {{end}}
+        </select>
+    </div>
+
+    <script>
+        function fetchClasses() {
+            const courseCode = document.getElementById('courses').value; // gets course code eg ACCT
+            // alert(courseCode);
+
+            // todo: make it filter classes by courseCode
+            if (courseCode) {
+                // fetch the classes based on selected courseCode
+                fetch(`/get-classes?courseCode=${courseCode}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const classSelect = document.getElementById('classes');
+                        classSelect.innerHTML = '<option value="">select a class</option>';
+
+                        data.forEach(classInfo => {
+                            const option = document.createElement('option');
+                            option.value = classInfo.CourseCode;
+                            option.textContent = classInfo.CourseNum;
+                            classSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching classes:', error));
+            }
+        }
+    </script>
 </body>
 </html>

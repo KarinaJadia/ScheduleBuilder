@@ -5,10 +5,10 @@ CREATE TABLE Courses (
     PRIMARY KEY (CourseCode) -- makes sure each course name is unique
 );
 
-DROP TABLE IF EXISTS CourseNames;
-CREATE TABLE CourseNames (
-    CourseNum varchar(255), -- course name and number, eg ACCT 2001
-    CourseCode varchar(255), -- course code, eg "ACCT"
-    PRIMARY KEY (CourseNum), -- makes sure each course name is unique
-    FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode) -- links to Courses table
+DROP TABLE IF EXISTS Classes;
+CREATE TABLE Classes (
+    ClassNum varchar(255), -- class name and number, eg ACCT 2001
+    ClassCode varchar(255), -- class code, eg "ACCT"
+    PRIMARY KEY (ClassNum), -- makes sure each course name is unique
+    FOREIGN KEY (ClassCode) REFERENCES Courses(CourseCode) -- links to Courses table
 );
