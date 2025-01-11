@@ -25,25 +25,26 @@
             {{end}}
         </select>
     </div>
+    <div>
+        <p>selected classes:</p>
+    </div>
 
     <script>
-        function fetchClasses() {
+        function fetchClasses() { // updates classes based on selected course
             const courseCode = document.getElementById('courses').value; // gets course code eg ACCT
-            // alert(courseCode);
-
-            // todo: make it filter classes by courseCode
             if (courseCode) {
                 // fetch the classes based on selected courseCode
                 fetch(`/get-classes?courseCode=${courseCode}`)
                     .then(response => response.json())
                     .then(data => {
                         const classSelect = document.getElementById('classes');
-                        classSelect.innerHTML = '<option value="">select a class</option>';
+                        classSelect.innerHTML = ''; // clear existing options
 
+                        // populate new options
                         data.forEach(classInfo => {
                             const option = document.createElement('option');
-                            option.value = classInfo.CourseCode;
-                            option.textContent = classInfo.CourseNum;
+                            option.value = classInfo.ClassCode;
+                            option.textContent = classInfo.ClassNum;
                             classSelect.appendChild(option);
                         });
                     })
