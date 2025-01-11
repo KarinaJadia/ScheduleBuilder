@@ -1,6 +1,3 @@
--- sqlite3 test.db
--- .read courses.sql
-
 DROP TABLE IF EXISTS Courses;
 CREATE TABLE Courses (
     CourseName varchar(255), -- the course name, eg Accounting
