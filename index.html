@@ -3,12 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Go Website</title>
+    <title>Schedule Builder 2.0</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Welcome to My Website</h1>
-    <p>This is a basic website served using Go!</p>
+    <p>select your classes:</p>
     <script src="/static/script.js"></script>
+
+    <h1>Database Data</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.Name}}</td>
+                <td>{{.Value}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
 </body>
 </html>
