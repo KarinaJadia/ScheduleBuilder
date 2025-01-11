@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function fetchClasses() {
-    alert("hello");
+    // alert("hello");
     /*const courseCode = document.getElementById('courses').value;
 
     if (courseCode) {
