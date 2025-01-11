@@ -3,9 +3,12 @@
 import requests
 from bs4 import BeautifulSoup
 import re # getting a little lost in the sauce with regex
+import sqlite3
+
+DATABASE = "test.db"
 
 def courseNames(url): # gets the course names
-    courses = []
+    courses = [] # stores the course name and code in this format: Accounting (ACCT)
     codes = []
 
     # this section is for reading the webpage and extracting the names
@@ -20,22 +23,35 @@ def courseNames(url): # gets the course names
         course_links = soup.find_all('a')  # find all anchor tags
         for link in course_links:
             if link.text.strip() and '(' in link.text:  # only taking courses
-                if link.text.strip() in courses: # for some reason it duplicates so 
+                course_name = link.text.strip()
+                course_name = course_name.replace("(RH)", "").strip()  # remove '(RH)' and clean up any extra spaces
+                if course_name in courses:  # avoid duplicates
                     break
-                courses.append(link.text.strip())
+                courses.append(course_name)
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred: {e}")
     
     # this section is for saving the course codes
-    with open('course_codes.txt', 'w') as file: # writes the course codes to a file
-        for course in courses:
-            match = re.search(r'\((.*?)\)', course)
-            if match:
-                code = match.group(1)
-                codes.append(code)
-                file.write(f'{code}\n') # todo: save to sql file
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+
+    for course in courses:
+        name, code = '',''
+        match = re.search(r'\((.*?)\)', course) # gets everything in the ()
+        if match:
+            code = match.group(1)
+            codes.append(code)
+
+        match = re.match(r'^(.*?)\s*\(', course)  # gets everything before the (
+        if match:
+            name = match.group(1).strip()  # Extract the part before '('
+
+        cursor.execute("INSERT OR REPLACE INTO Courses (CourseName, CourseCode) VALUES (?, ?)", [name, code])
     
+    connection.commit()
+    connection.close()
+
     return codes
 
 def codes(url): # gets the individual courses in each school
@@ -62,4 +78,4 @@ def codes(url): # gets the individual courses in each school
             print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    codes('https://catalog.uconn.edu/undergraduate/courses/#coursestext')
+    courseNames('https://catalog.uconn.edu/undergraduate/courses/#coursestext')

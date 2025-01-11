@@ -1,9 +1,11 @@
-DROP TABLE IF EXISTS Courses
+-- sqlite3 test.db
+-- .read courses.sql
+
+DROP TABLE IF EXISTS Courses;
 CREATE TABLE Courses (
     CourseName varchar(255), -- the course name, eg Accounting
     CourseCode varchar(255), -- the course code, eg ACCT
-    PRIMARY KEY (CourseCode), -- makes sure each course name is unique
-    FOREIGN KEY (CourseCode) REFERENCES Courses(CourseCode) -- Foreign key linking to Courses
+    PRIMARY KEY (CourseCode) -- makes sure each course name is unique
 );
 
 DROP TABLE IF EXISTS CourseNames;
