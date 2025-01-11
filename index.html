@@ -7,27 +7,26 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <p>select your classes:</p>
-    <script src="/static/script.js"></script>
+    <div>
+        <p>select your classes:</p>
+        <script src="/static/script.js"></script>
 
-    <h1>Database Data</h1>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{range .}}
-            <tr>
-                <td>{{.ID}}</td>
-                <td>{{.Name}}</td>
-                <td>{{.Value}}</td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .}}
+                <tr>
+                    <td>{{.CourseName}}</td>
+                    <td>{{.CourseCode}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

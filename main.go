@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 type Courses struct {
@@ -21,7 +21,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// SQLite database connection
-	db, err := sql.Open("sqlite3", "test.db")
+	db, err := sql.Open("sqlite", "test.db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		rows, err := db.Query("SELECT CourseName, CourseCode FROM Courses")
 		if err != nil {
-			http.Error(w, "Database query error", http.StatusInternalServerError)
+			http.Error(w, "Database query error: " + err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer rows.Close()
