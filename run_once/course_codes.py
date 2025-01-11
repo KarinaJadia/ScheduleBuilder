@@ -91,7 +91,6 @@ def codes(url): # gets the individual courses in each school
 
     connection.commit()
     connection.close()
-
     print('successfully populated classes table')
 
 if __name__ == "__main__":
