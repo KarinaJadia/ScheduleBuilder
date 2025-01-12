@@ -71,8 +71,7 @@
 
         function addClass() {
             const selectedClassNum = document.getElementById('classes').value;
-            alert(selectedClassNum)
-
+            // alert(selectedClassNum)
             if (selectedClassNum) {
                 fetch('/add-class', {
                     method: 'POST',
@@ -96,7 +95,7 @@
                     newRow.innerHTML = `
                         <td>${data.ClassNum}</td>
                         <td>
-                            <button id="${data.ClassNum}" value="${data.ClassNum}" onclick="deleteClass('${data.ClassNum}')">Delete</button>
+                            <button id="${data.ClassNum}" value="${data.ClassNum}" onclick="deleteClass('${data.ClassNum}')">delete</button>
                         </td>
                     `;
                     tableBody.appendChild(newRow);
@@ -106,7 +105,7 @@
         }
 
         function deleteClass(classNum) {
-            alert('class deleted: ', classNum)
+            alert("class deleted")
             fetch(`/delete-class`, {
                 method: 'DELETE',
                 headers: {
@@ -123,7 +122,7 @@
                 .then(data => {
                     console.log('class deleted:', data);
 
-                    // Remove the row from the table
+                    // remove the row from the table
                     const row = document.getElementById(`row-${classNum}`);
                     if (row) {
                         row.remove();

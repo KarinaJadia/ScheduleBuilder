@@ -76,6 +76,23 @@ func main() {
 			classes = append(classes, d)
 		}
 
+		rows, err = db.Query("SELECT ClassNum FROM SelectedClasses")
+		if err != nil {
+			http.Error(w, "Database query error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+	
+		var selectedClasses []SelectedClasses
+		for rows.Next() {
+			var d SelectedClasses
+			if err := rows.Scan(&d.ClassNum); err != nil {
+				http.Error(w, "Database scan error: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			selectedClasses = append(selectedClasses, d)
+		}
+
 		data := struct {
 			Courses []Courses
 			Classes []Classes
@@ -83,7 +100,7 @@ func main() {
 		}{
 			Courses: courses,
 			Classes: classes,
-			SelectedClasses: []SelectedClasses{},
+			SelectedClasses: selectedClasses,
 		}
 		
 		if err := tmpl.Execute(w, data); err != nil {
