@@ -25,6 +25,7 @@
             {{end}}
         </select>
     </div>
+    <p></p>
     <div>
         <table id="selected-classes-table" border="1">
             <thead>
@@ -56,6 +57,13 @@
                     .then(data => {
                         const classSelect = document.getElementById('classes');
                         classSelect.innerHTML = ''; // clear existing options
+
+                        const placeholderOption = document.createElement('option');
+                        placeholderOption.value = '';
+                        placeholderOption.textContent = 'please select';
+                        placeholderOption.disabled = true;
+                        placeholderOption.selected = true;
+                        classSelect.appendChild(placeholderOption);
 
                         // populate new options
                         data.forEach(classInfo => {
