@@ -90,62 +90,11 @@ def parse_time(meeting_time): # parse meeting time into start and end times eg '
         return hour * 60 + minute
     return days, to_minutes(start), to_minutes(end)
 
-def time_conflicts(section1, section2): # check if two sections conflict based on meeting times
-    days1, start1, end1 = parse_time(section1["Meets"])
-    days2, start2, end2 = parse_time(section2["Meets"])
-    overlap_days = set(days1).intersection(set(days2))
-    if overlap_days and not (end1 <= start2 or end2 <= start1):
-        return True
-    return False
-
-def is_valid_combination(class_schedule):
-    """
-    Validate a class schedule:
-    - Ensure Lecture is paired with Lab/Discussion if required.
-    - Check for time conflicts within the class.
-    """
-    lectures = [sec for sec in class_schedule if sec["Type"] == "Lecture"]
-    labs = [sec for sec in class_schedule if sec["Type"] in {"Lab", "Discussion"}]
-    lsa = [sec for sec in class_schedule if sec["Type"] == "LSA"]
-
-    if lsa:
-        return len(lectures) == 0 and len(labs) == 0  # standalone class
-
-    # lecture + lab/discussion validation
-    if lectures and labs:
-        for lecture in lectures:
-            for lab in labs:
-                if not time_conflicts(lecture, lab):
-                    return True  # valid pairing
-    return False
-
-def generate_schedules(classes):
-    """
-    Generate all possible schedules given classes.
-    - Each class must meet the Lecture+Lab/Discussion or LSA condition.
-    - No time conflicts between sections.
-    """
-    print('starting validation')
-    all_combinations = product(*[class_sections["Lecture"] + class_sections["Lab"] + class_sections["Discussion"] + class_sections["LSA"] for class_sections in classes])
-
-    valid_schedules = []
-    i = 1
-    for combination in all_combinations:
-        print(f'testing...{i}')
-        i+=1
-        if is_valid_combination(combination):
-            # check for overall time conflicts between classes
-            print('checking a schedule...')
-            if not any(time_conflicts(s1, s2) for i, s1 in enumerate(combination) for s2 in combination[i+1:]):
-                valid_schedules.append(combination)
-                print('successful schedule added!')
-    return valid_schedules
-
 if __name__ == "__main__":
-    print(parse_time('MW 10:10-11a'))
-    # selected_classes = getSelected()
-    # all_classes = []
-    # for i in selected_classes:
-    #     sections = getSections(i)
-    #     all_classes.append(sections)
-    #     print(sections)
+
+    selected_classes = getSelected()
+    all_classes = []
+    for i in selected_classes:
+        sections = getSections(i)
+        all_classes.append(sections)
+        print(sections)
