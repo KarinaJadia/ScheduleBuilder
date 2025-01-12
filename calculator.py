@@ -21,25 +21,9 @@ def getTimes(selected_class):
     print(url)
     driver = webdriver.Chrome()
     driver.get(url)
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-
-        # parse html
-        soup = BeautifulSoup(response.text, 'html.parser')
-        # with open("response.txt", "w") as file:
-        #     file.write(response.text)
-        # print(response.text)
-
-        grid = soup.find_all('a')  # Use the correct tag and class name
-
-        # loop through each element and extract data
-        for element in grid:
-            if element.text.strip() and 'M' in element.text:  # only taking courses
-                print(element.text)
-
-    except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
+    driver.implicitly_wait(10)
+    section_info = driver.find_element(By.XPATH, '/html/body/main/div[2]/div/div[2]/div[18]/div/div/div[1]').text
+    print(section_info)
 
 if __name__ == "__main__":
     selected_classes = getSelected()
