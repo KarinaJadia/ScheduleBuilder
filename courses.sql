@@ -9,12 +9,13 @@ DROP TABLE IF EXISTS Classes;
 CREATE TABLE Classes (
     ClassNum varchar(255), -- class name and number, eg ACCT 2001
     ClassCode varchar(255), -- class code, eg "ACCT"
-    PRIMARY KEY (ClassNum), -- makes sure each course name is unique
+    PRIMARY KEY (ClassNum), -- makes sure each class name is unique
     FOREIGN KEY (ClassCode) REFERENCES Courses(CourseCode) -- links to Courses table
 );
 
 DROP TABLE IF EXISTS SelectedClasses;
 CREATE TABLE SelectedClasses (
     ClassNum varchar(255), -- class name and number, eg ACCT 2001
+    PRIMARY KEY (ClassNum), -- makes sure each class name is unique
     FOREIGN KEY (ClassNum) REFERENCES Classes(ClassNum) -- links to Classes table
 );

@@ -60,7 +60,7 @@
                         // populate new options
                         data.forEach(classInfo => {
                             const option = document.createElement('option');
-                            option.value = classInfo.ClassCode;
+                            option.value = classInfo.ClassNum;
                             option.textContent = classInfo.ClassNum;
                             classSelect.appendChild(option);
                         });
@@ -90,7 +90,7 @@
                 .then(data => {
                     console.log('Class added:', data);
 
-                    // Dynamically update the table to show the new class
+                    // dynamically update the table to show the new class
                     const tableBody = document.querySelector('#selected-classes-table tbody');
                     const newRow = document.createElement('tr');
                     newRow.id = `row-${data.ClassNum}`;
