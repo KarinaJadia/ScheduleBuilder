@@ -45,61 +45,69 @@ def getSections(selected_class): # gets the sections from a selected class
         meets = section_lines[i+3]
         instructor = section_lines[i+4]
 
-        for i in range(0, (len(section_lines) - 1), 5):
-            crn = section_lines[i]
-            section = section_lines[i + 1]
-            type_ = section_lines[i + 2]
-            meets = section_lines[i + 3]
-            instructor = section_lines[i + 4]
+        section_entry = {
+            "CRN": crn,
+            "Section": section,
+            "Type": None,  # Will be updated below
+            "Meets": meets,
+            "Instructor": instructor
+        }
 
-            section_entry = {
-                "CRN": crn,
-                "Section": section,
-                "Type": None,  # Will be updated below
-                "Meets": meets,
-                "Instructor": instructor
-            }
-
-            if type_ == 'DIS':
-                section_entry["Type"] = "Discussion"
-                sections["Discussion"].append(section_entry)
-            elif type_ == 'LEC':
-                section_entry["Type"] = "Lecture"
-                sections["Lecture"].append(section_entry)
-            elif type_ == 'LAB':
-                section_entry["Type"] = "Lab"
-                sections["Lab"].append(section_entry)
-            else:
-                section_entry["Type"] = "LSA"
-                sections["LSA"].append(section_entry)
+        if type_ == 'DIS':
+            section_entry["Type"] = "Discussion"
+            sections["Discussion"].append(section_entry)
+        elif type_ == 'LEC':
+            section_entry["Type"] = "Lecture"
+            sections["Lecture"].append(section_entry)
+        elif type_ == 'LAB':
+            section_entry["Type"] = "Lab"
+            sections["Lab"].append(section_entry)
+        else:
+            section_entry["Type"] = "LSA"
+            sections["LSA"].append(section_entry)
 
     return sections
 
 def parse_time(meeting_time): # parse meeting time into start and end times eg 'MW 10:10-11a'
-    days, times = meeting_time.split()
-    start, end = times.split('-')
+    meeting_times = []
+    if ';' in meeting_time:
+        meeting_times = meeting_time.split(';')
+    else:
+        meeting_times.append(meeting_time)
 
-    # handles improper formats
-    # test cases used:
-    # print(parse_time('MW 10:10-11a'))
-    # print(parse_time('TTH 11a-12:40p'))
-    # print(parse_time('MWF 1-2:40p'))
-    if 'a' not in start and 'p' not in start:
-        start = start + end[-1]
-    if ":" not in start:
-        start = start[0:-1] + ":00" + start[-1]
-    if ":" not in end:
-        end = end[0:-1] + ":00" + end[-1]
+    tots = {
+        "starts": [],
+        "ends": []
+    }
+    for meeting_time in meeting_times:
 
-    # convert to 24-hour format
-    def to_minutes(t):
-        hour, minute = map(int, t[:-1].split(':'))
-        if t[-1] == 'p' and hour != 12:  # convert PM to 24-hour
-            hour += 12
-        elif t[-1] == 'a' and hour == 12:  # convert 12 AM to 0
-            hour = 0
-        return hour * 60 + minute
-    return days, to_minutes(start), to_minutes(end)
+        days, times = meeting_time.split()
+        start, end = times.split('-')
+
+        # handles improper formats
+        if 'a' not in start and 'p' not in start:
+            start = start + end[-1]
+        if ":" not in start:
+            start = start[0:-1] + ":00" + start[-1]
+        if ":" not in end:
+            end = end[0:-1] + ":00" + end[-1]
+
+        start = days + ' ' + start
+        end = days + ' ' + end
+        tots['starts'].append(start)
+        tots['ends'].append(end)
+
+    print(tots)
+
+    # # convert to 24-hour format
+    # def to_minutes(t):
+    #     hour, minute = map(int, t[:-1].split(':'))
+    #     if t[-1] == 'p' and hour != 12:  # convert PM to 24-hour
+    #         hour += 12
+    #     elif t[-1] == 'a' and hour == 12:  # convert 12 AM to 0
+    #         hour = 0
+    #     return hour * 60 + minute
+    # return days, to_minutes(start), to_minutes(end)
 
 def time_conflicts(section1, section2): # check if two sections conflict based on meeting times
     days1, start1, end1 = parse_time(section1["Meets"])
@@ -154,13 +162,20 @@ def generate_schedules(classes):
     return valid_schedules
 
 if __name__ == "__main__":
-    
-    selected_classes = getSelected()
-    all_classes = []
-    for i in selected_classes:
-        sections = getSections(i)
-        all_classes.append(sections)
-        # print(sections)
 
-    x = generate_schedules(all_classes)
-    print(x)
+    print(parse_time('MW 10:10-11a'))
+    print(parse_time('TTH 11a-12:40p'))
+    print(parse_time('MWF 1-2:40p'))
+    print(parse_time('TTh 11a-1p'))
+    print(parse_time('MW 9-9:45a; F 9:05-10:45a'))
+    print(parse_time('TTh 11a-1p; F 9:05-10:45a'))
+    
+    # selected_classes = getSelected()
+    # all_classes = []
+    # for i in selected_classes:
+    #     sections = getSections(i)
+    #     all_classes.append(sections)
+    #     # print(sections)
+
+    # x = generate_schedules(all_classes)
+    # print(x)
