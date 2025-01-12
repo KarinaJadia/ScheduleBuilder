@@ -19,11 +19,7 @@
     </div>
     <div>
         <label for="classes">select a class:</label>
-        <select name="classes" id="classes" onchange="addClass()">
-            {{range .Classes}}
-            <option value="{{.ClassNum}}">{{.ClassNum}}</option>
-            {{end}}
-        </select>
+        <select name="classes" id="classes" onchange="addClass()"></select>
     </div>
     <button id="calculator" onclick="alert('Hello!')">calculate</button>
 
