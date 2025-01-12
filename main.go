@@ -92,7 +92,7 @@ func main() {
 		}
 	})
 
-	// handler to add class
+	// handler to add classes to selected classes list
 	http.HandleFunc("/add-class", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -116,9 +116,35 @@ func main() {
 		// Respond with the added class as JSON
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(selectedClass)
-	})		
+	})
+	
+	// handler to delete class from selected classes list
+	http.HandleFunc("/delete-class", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
+		var requestData struct {
+			ClassNum string `json:"ClassNum"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+			http.Error(w, "Invalid JSON body", http.StatusBadRequest)
+			return
+		}
+		if requestData.ClassNum == "" {
+			http.Error(w, "Missing ClassNum", http.StatusBadRequest)
+			return
+		}
+		_, err := db.Exec("DELETE FROM SelectedClasses WHERE ClassNum = ?", requestData.ClassNum)
+		if err != nil {
+			http.Error(w, "Failed to delete class: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+	})	
 
-	// get classes handler
+	// handler to get list of classes to dropdown when course is selected
 	http.HandleFunc("/get-classes", func(w http.ResponseWriter, r *http.Request) {
 		courseCode := r.URL.Query().Get("courseCode") // get selected CourseCode from query parameter
 		

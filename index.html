@@ -106,10 +106,32 @@
         }
 
         function deleteClass(classNum) {
-            const row = document.getElementById(`row-${classNum}`);
-            if (row) {
-                row.remove();
-            }
+            alert('class deleted: ', classNum)
+            fetch(`/delete-class`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ ClassNum: classNum }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('failed to delete class');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('class deleted:', data);
+
+                    // Remove the row from the table
+                    const row = document.getElementById(`row-${classNum}`);
+                    if (row) {
+                        row.remove();
+                    }
+                })
+                .catch(error => {
+                    console.error('error deleting class:', error);
+                });
         }
 
     </script>
