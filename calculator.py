@@ -53,19 +53,24 @@ def getSections(selected_class): # gets the sections from a selected class
             instructor = section_lines[i + 4]
 
             section_entry = {
-                # "CRN": crn,
+                "CRN": crn,
                 "Section": section,
+                "Type": None,  # Will be updated below
                 "Meets": meets,
                 "Instructor": instructor
             }
 
             if type_ == 'DIS':
+                section_entry["Type"] = "Discussion"
                 sections["Discussion"].append(section_entry)
             elif type_ == 'LEC':
+                section_entry["Type"] = "Lecture"
                 sections["Lecture"].append(section_entry)
             elif type_ == 'LAB':
+                section_entry["Type"] = "Lab"
                 sections["Lab"].append(section_entry)
             else:
+                section_entry["Type"] = "LSA"
                 sections["LSA"].append(section_entry)
 
     return sections
@@ -74,7 +79,13 @@ def parse_time(meeting_time): # parse meeting time into start and end times eg '
     days, times = meeting_time.split()
     start, end = times.split('-')
 
-    # handles the times
+    # handles improper formats
+    # test cases used:
+    # print(parse_time('MW 10:10-11a'))
+    # print(parse_time('TTH 11a-12:40p'))
+    # print(parse_time('MWF 1-2:40p'))
+    if 'a' not in start and 'p' not in start:
+        start = start + end[-1]
     if ":" not in start:
         start = start[0:-1] + ":00" + start[-1]
     if ":" not in end:
@@ -131,7 +142,8 @@ def generate_schedules(classes):
     valid_schedules = []
     i = 1
     for combination in all_combinations:
-        print(f'testing...{i}')
+        if i%100 == 0:
+            print(f'testing...{i}')
         i+=1
         if is_valid_combination(combination):
             # check for overall time conflicts between classes
@@ -142,10 +154,13 @@ def generate_schedules(classes):
     return valid_schedules
 
 if __name__ == "__main__":
-    print(parse_time('MW 10:10-11a'))
-    # selected_classes = getSelected()
-    # all_classes = []
-    # for i in selected_classes:
-    #     sections = getSections(i)
-    #     all_classes.append(sections)
-    #     print(sections)
+    
+    selected_classes = getSelected()
+    all_classes = []
+    for i in selected_classes:
+        sections = getSections(i)
+        all_classes.append(sections)
+        # print(sections)
+
+    x = generate_schedules(all_classes)
+    print(x)
