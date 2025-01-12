@@ -19,14 +19,31 @@
     </div>
     <div>
         <label for="classes">select a class:</label>
-        <select name="classes" id="classes">
+        <select name="classes" id="classes" onchange="addClass()">
             {{range .Classes}}
             <option value="{{.ClassNum}}">{{.ClassNum}}</option>
             {{end}}
         </select>
     </div>
     <div>
-        <p>selected classes:</p>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>selected classes</th>
+                    <th>delete?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .SelectedClasses}}
+                <tr id="row-{{.ClassNum}}">
+                    <td>{{.ClassNum}}</td>
+                    <td>
+                        <button id="{{.ClassNum}}" value="{{.ClassNum}}" onclick="deleteClass('{{.ClassNum}}')">delete</button>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
     </div>
 
     <script>
@@ -51,6 +68,51 @@
                     .catch(error => console.error('Error fetching classes:', error));
             }
         }
+
+        function addClass() {
+            const selectedClassNum = document.getElementById('classes').value;
+            alert(selectedClassNum)
+
+            if (selectedClassNum) {
+                fetch('/add-class', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ClassNum: selectedClassNum }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to add class');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Class added:', data);
+
+                    // Dynamically update the table to show the new class
+                    const tableBody = document.querySelector('#selected-classes-table tbody');
+                    const newRow = document.createElement('tr');
+                    newRow.id = `row-${data.ClassNum}`;
+                    newRow.innerHTML = `
+                        <td>${data.ClassNum}</td>
+                        <td>
+                            <button id="${data.ClassNum}" value="${data.ClassNum}" onclick="deleteClass('${data.ClassNum}')">Delete</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(newRow);
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+
+        function deleteClass(classNum) {
+            const row = document.getElementById(`row-${classNum}`);
+            if (row) {
+                row.remove();
+            }
+        }
+
     </script>
 </body>
 </html>

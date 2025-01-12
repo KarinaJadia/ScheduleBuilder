@@ -12,3 +12,9 @@ CREATE TABLE Classes (
     PRIMARY KEY (ClassNum), -- makes sure each course name is unique
     FOREIGN KEY (ClassCode) REFERENCES Courses(CourseCode) -- links to Courses table
 );
+
+DROP TABLE IF EXISTS SelectedClasses;
+CREATE TABLE SelectedClasses (
+    ClassNum varchar(255), -- class name and number, eg ACCT 2001
+    FOREIGN KEY (ClassNum) REFERENCES Classes(ClassNum) -- links to Classes table
+);

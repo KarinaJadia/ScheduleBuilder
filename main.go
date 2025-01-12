@@ -20,6 +20,10 @@ type Classes struct {
 	ClassCode string `json:"ClassCode"`
 }
 
+type SelectedClasses struct {
+	ClassNum string `json:"ClassNum"`
+}
+
 // handler function for HTML page
 func handler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
@@ -75,16 +79,44 @@ func main() {
 		data := struct {
 			Courses []Courses
 			Classes []Classes
+			SelectedClasses []SelectedClasses
 		}{
 			Courses: courses,
 			Classes: classes,
-		}	
-
+			SelectedClasses: []SelectedClasses{},
+		}
+		
 		if err := tmpl.Execute(w, data); err != nil {
 			http.Error(w, "Template execution error: "+ err.Error(), http.StatusInternalServerError)
 			return
 		}
 	})
+
+	// handler to add class
+	http.HandleFunc("/add-class", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+			return
+		}
+	
+		// parse JSON body
+		var selectedClass SelectedClasses
+		if err := json.NewDecoder(r.Body).Decode(&selectedClass); err != nil {
+			http.Error(w, "Invalid JSON body: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+	
+		// insert class into the database
+		_, err := db.Exec("INSERT OR REPLACE INTO SelectedClasses (ClassNum) VALUES (?)", selectedClass.ClassNum)
+		if err != nil {
+			http.Error(w, "Database insert error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	
+		// Respond with the added class as JSON
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(selectedClass)
+	})		
 
 	// get classes handler
 	http.HandleFunc("/get-classes", func(w http.ResponseWriter, r *http.Request) {
