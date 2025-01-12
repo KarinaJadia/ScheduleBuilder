@@ -79,6 +79,12 @@
             const selectedClassNum = document.getElementById('classes').value;
             // alert(selectedClassNum)
             if (selectedClassNum) {
+                const existingRow = document.querySelector(`#row-${selectedClassNum}`);
+                if (existingRow) {
+                    alert('class already added');
+                    return;
+                }
+
                 fetch('/add-class', {
                     method: 'POST',
                     headers: {
