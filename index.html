@@ -26,7 +26,7 @@
         </select>
     </div>
     <div>
-        <table border="1">
+        <table id="selected-classes-table" border="1">
             <thead>
                 <tr>
                     <th>selected classes</th>
@@ -88,8 +88,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Class added:', data);
-
+                    console.log('class added:', data);
                     // dynamically update the table to show the new class
                     const tableBody = document.querySelector('#selected-classes-table tbody');
                     const newRow = document.createElement('tr');
