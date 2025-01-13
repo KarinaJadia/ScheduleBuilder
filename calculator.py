@@ -46,6 +46,7 @@ def getSections(selected_class): # gets the sections from a selected class
         instructor = section_lines[i+4]
 
         section_entry = {
+            "Class": selected_class,
             "CRN": crn,
             "Section": section,
             "Type": None,  # Will be updated below
@@ -114,37 +115,61 @@ def parse_time(meeting_time): # parse meeting time into start and end times eg '
             tots['starts'].append(d + ' ' + start)
             tots['ends'].append(d + ' ' + end)
 
-    print(tots)
-
-    # return days, to_minutes(start), to_minutes(end)
+    return tots
 
 def time_conflicts(section1, section2): # check if two sections conflict based on meeting times
-    days1, start1, end1 = parse_time(section1["Meets"])
-    days2, start2, end2 = parse_time(section2["Meets"])
-    overlap_days = set(days1).intersection(set(days2))
-    if overlap_days and not (end1 <= start2 or end2 <= start1):
-        return True
-    return False
+
+    if section1['Meets'] == 'Does Not Meet' or section2['Meets'] == 'Does Not Meet':
+        return False
+    
+    s1 = parse_time(section1['Meets'])
+    s2 = parse_time(section2['Meets'])
+
+    print(s1,'\n', s2)
+    for start1, end1 in zip(s1['starts'], s1['ends']):
+        day1, time1_start = start1.split()
+        _, time1_end = end1.split()
+        time1_start = int(time1_start)
+        time1_end = int(time1_end)
+
+        for start2, end2 in zip(s2['starts'], s2['ends']):
+            day2, time2_start = start2.split()
+            _, time2_end = end2.split()
+            time2_start = int(time2_start)
+            time2_end = int(time2_end)
+
+            # Check if the days overlap
+            if day1 == day2:
+                # Check if the times overlap
+                if not (time1_end <= time2_start or time2_end <= time1_start):
+                    return True  # Conflict found
+    return False  # No conflicts
 
 def is_valid_combination(class_schedule):
     """
     Validate a class schedule:
     - Ensure Lecture is paired with Lab/Discussion if required.
+    - Allow standalone classes (LSA) but not mixed with Lecture or Lab/Discussion.
     - Check for time conflicts within the class.
     """
     lectures = [sec for sec in class_schedule if sec["Type"] == "Lecture"]
     labs = [sec for sec in class_schedule if sec["Type"] in {"Lab", "Discussion"}]
     lsa = [sec for sec in class_schedule if sec["Type"] == "LSA"]
 
+    # LSA validation
     if lsa:
-        return len(lectures) == 0 and len(labs) == 0  # standalone class
+        # Valid if only LSAs are present and no Lectures or Labs/Discussions
+        return len(lectures) == 0 and len(labs) == 0
 
-    # lecture + lab/discussion validation
+    # Lecture + Lab/Discussion validation
     if lectures and labs:
+        # Check if any Lecture and Lab/Discussion pairing is valid
         for lecture in lectures:
             for lab in labs:
                 if not time_conflicts(lecture, lab):
-                    return True  # valid pairing
+                    return True  # Valid pairing
+
+    # If neither condition is met, the combination is invalid
     return False
 
 def generate_schedules(classes):
@@ -172,19 +197,21 @@ def generate_schedules(classes):
 
 if __name__ == "__main__":
 
-    print(parse_time('MW 10:10-11a'))
-    print(parse_time('TTh 11a-12:40p'))
-    print(parse_time('MWF 1-2:40p'))
-    print(parse_time('TTh 11a-1p'))
-    print(parse_time('MW 9-9:45a; F 9:05-10:45a'))
-    print(parse_time('TTh 11a-1p; F 9:05-10:45a'))
+    # print(parse_time('MW 10:10-11a'))
+    # print(parse_time('TTh 11a-12:40p'))
+    # print(parse_time('MWF 1-2:40p'))
+    # print(parse_time('TTh 11a-1p'))
+    # print(parse_time('MW 9-9:45a; F 9:05-10:45a'))
+    # print(parse_time('TTh 11a-1p; F 9:05-10:45a'))
     
-    # selected_classes = getSelected()
-    # all_classes = []
-    # for i in selected_classes:
-    #     sections = getSections(i)
-    #     all_classes.append(sections)
-    #     # print(sections)
+    selected_classes = getSelected()
+    all_classes = []
+    for i in selected_classes:
+        sections = getSections(i)
+        all_classes.append(sections)
+        # print(sections)
 
-    # x = generate_schedules(all_classes)
-    # print(x)
+    x = generate_schedules(all_classes)
+    for i in x:
+        print(i)
+        print()
