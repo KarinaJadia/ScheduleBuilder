@@ -92,10 +92,15 @@ def parse_time(meeting_time): # parse meeting time into start and end times eg '
         if ":" not in end:
             end = end[0:-1] + ":00" + end[-1]
 
-        start = days + ' ' + start
-        end = days + ' ' + end
-        tots['starts'].append(start)
-        tots['ends'].append(end)
+        days_split = list(days)
+        if 'h' in days_split:
+            x = days_split.index('h')
+            del days_split[x]
+            days_split[x-1] = 'Th'
+        
+        for d in days_split:
+            tots['starts'].append(d + ' ' + start)
+            tots['ends'].append(d + ' ' + end)
 
     print(tots)
 
@@ -164,7 +169,7 @@ def generate_schedules(classes):
 if __name__ == "__main__":
 
     print(parse_time('MW 10:10-11a'))
-    print(parse_time('TTH 11a-12:40p'))
+    print(parse_time('TTh 11a-12:40p'))
     print(parse_time('MWF 1-2:40p'))
     print(parse_time('TTh 11a-1p'))
     print(parse_time('MW 9-9:45a; F 9:05-10:45a'))
