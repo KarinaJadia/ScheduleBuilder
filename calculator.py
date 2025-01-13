@@ -68,6 +68,14 @@ def getSections(selected_class): # gets the sections from a selected class
 
     return sections
 
+def to_minutes(t):
+        hour, minute = map(int, t[:-1].split(':'))
+        if t[-1] == 'p' and hour != 12:  # convert PM to 24-hour
+            hour += 12
+        elif t[-1] == 'a' and hour == 12:  # convert 12 AM to 0
+            hour = 0
+        return hour * 60 + minute
+
 def parse_time(meeting_time): # parse meeting time into start and end times eg 'MW 10:10-11a'
     meeting_times = []
     if ';' in meeting_time:
@@ -92,26 +100,22 @@ def parse_time(meeting_time): # parse meeting time into start and end times eg '
         if ":" not in end:
             end = end[0:-1] + ":00" + end[-1]
 
+        start, end = str(to_minutes(start)), str(to_minutes(end))
+
+        # makes T and Th proper
         days_split = list(days)
         if 'h' in days_split:
             x = days_split.index('h')
             del days_split[x]
             days_split[x-1] = 'Th'
         
+        # creates a dictionary with all starts and all ends
         for d in days_split:
             tots['starts'].append(d + ' ' + start)
             tots['ends'].append(d + ' ' + end)
 
     print(tots)
 
-    # # convert to 24-hour format
-    # def to_minutes(t):
-    #     hour, minute = map(int, t[:-1].split(':'))
-    #     if t[-1] == 'p' and hour != 12:  # convert PM to 24-hour
-    #         hour += 12
-    #     elif t[-1] == 'a' and hour == 12:  # convert 12 AM to 0
-    #         hour = 0
-    #     return hour * 60 + minute
     # return days, to_minutes(start), to_minutes(end)
 
 def time_conflicts(section1, section2): # check if two sections conflict based on meeting times
