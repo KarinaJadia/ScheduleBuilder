@@ -178,21 +178,28 @@ def generate_schedules(classes):
     - Each class must meet the Lecture+Lab/Discussion or LSA condition.
     - No time conflicts between sections.
     """
-    print('starting validation')
-    all_combinations = product(*[class_sections["Lecture"] + class_sections["Lab"] + class_sections["Discussion"] + class_sections["LSA"] for class_sections in classes])
+    all_combinations = []
 
+    for class_sections in classes: # goes through each class
+        # print(class_sections,'\n')
+        if class_sections["LSA"]:
+            # If LSA exists, only use LSA sections for this class
+            all_combinations.append(class_sections["LSA"])
+        if class_sections["Lecture"]:
+            # Otherwise, include Lecture + Lab/Discussion combinations
+            combined_sections = class_sections["Lecture"] + class_sections["Lab"] + class_sections["Discussion"]
+            all_combinations.append(combined_sections)
+    print(all_combinations)
+    # Generate all possible schedules
+    all_possible_schedules = product(*all_combinations)
     valid_schedules = []
-    i = 1
-    for combination in all_combinations:
-        if i%100 == 0:
-            print(f'testing...{i}')
-        i+=1
+
+    for combination in all_possible_schedules:
         if is_valid_combination(combination):
-            # check for overall time conflicts between classes
-            print('checking a schedule...')
+            # Check for overall time conflicts between classes
             if not any(time_conflicts(s1, s2) for i, s1 in enumerate(combination) for s2 in combination[i+1:]):
                 valid_schedules.append(combination)
-                print('successful schedule added!')
+
     return valid_schedules
 
 if __name__ == "__main__":
