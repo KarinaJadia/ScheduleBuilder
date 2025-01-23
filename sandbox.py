@@ -122,6 +122,10 @@ def parse_time(meeting_time): # parse meeting time into start and end times eg '
     return tots # returns in format {'starts': [M 100, W 100], 'ends': {M 200, W 200} or False
 
 def time_conflicts(section1, section2): # check if two sections conflict based on meeting times (takes meeting times)
+    """
+    takes 2 section meeting times, returns false if no conflicts and true if conflicts
+    make sure to only pass meeting times, so like sections['class']['meeting'] for both
+    """
     if not section1 or not section2: # if one section does not meet
         return False # no conflicts
     
