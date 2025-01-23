@@ -8,7 +8,8 @@ from itertools import product
 
 DATABASE = "test.db"
 
-def getSelected(): # gets the selected classes from the database
+def getSelected(): 
+    '''gets the selected classes from the database'''
     connection = sqlite3.connect(DATABASE)
     cursor = connection.cursor()
     results = cursor.execute("SELECT ClassNum FROM SelectedClasses").fetchall()
@@ -16,7 +17,8 @@ def getSelected(): # gets the selected classes from the database
     connection.close()
     return class_nums
 
-def getSections(selected_class): # gets the sections from a selected class
+def getSections(selected_class): 
+    '''gets the sections from a selected class'''
     url = "https://catalog.uconn.edu/course-search/?details&code=" + selected_class.replace(" ", "%20")
     print(f'getting data for {selected_class}')
     driver = webdriver.Chrome() # uconn just has to make this extra hard for me
@@ -69,7 +71,7 @@ def getSections(selected_class): # gets the sections from a selected class
 
     return sections
 
-def to_minutes(t):
+def to_minutes(t): # helper for parse_time
         hour, minute = map(int, t[:-1].split(':'))
         if t[-1] == 'p' and hour != 12:  # convert PM to 24-hour
             hour += 12
@@ -158,10 +160,10 @@ def time_conflicts(section1, section2): # check if two sections conflict based o
 
 def is_valid_combination(class_schedule):
     """
-    Validate a class schedule:
-    - Ensure Lecture is paired with Lab/Discussion if required.
-    - Allow standalone classes (LSA) but not mixed with Lecture or Lab/Discussion.
-    - Check for time conflicts within the class.
+    validate a class schedule:
+    - ensure Lecture is paired with Lab/Discussion if required
+    - allow standalone classes (LSA) but not mixed with Lecture or Lab/Discussion.
+    - check for time conflicts within the class.
     """
     lectures = [sec for sec in class_schedule if sec["Type"] == "Lecture"]
     labs = [sec for sec in class_schedule if sec["Type"] in {"Lab", "Discussion"}]
@@ -184,49 +186,37 @@ def is_valid_combination(class_schedule):
 
 def generate_schedules(classes):
     """
-    Generate all possible schedules given classes.
-    - Each class must meet the Lecture+Lab/Discussion or LSA condition.
-    - No time conflicts between sections.
+    generates all possible schedules given classes, then passes all possibilities to is_valid_cobination
     """
     print('starting validation')
-    all_combinations = product(*[class_sections["Lecture"] + class_sections["Lab"] + class_sections["Discussion"] + class_sections["LSA"] for class_sections in classes])
 
-    valid_schedules = []
-    i = 1
-    for combination in all_combinations:
-        if i%100 == 0:
-            print(f'testing...{i}')
-        i+=1
-        if is_valid_combination(combination):
-            # check for overall time conflicts between classes
-            print('checking a schedule...')
-            if not any(time_conflicts(s1, s2) for i, s1 in enumerate(combination) for s2 in combination[i+1:]):
-                valid_schedules.append(combination)
-                print('successful schedule added!')
-    return valid_schedules
+
+
+    # all_combinations = product(*[class_sections["Lecture"] + class_sections["Lab"] + class_sections["Discussion"] + class_sections["LSA"] for class_sections in classes])
+
+    # valid_schedules = []
+    # i = 1
+    # for combination in all_combinations:
+    #     if i%100 == 0:
+    #         print(f'testing...{i}')
+    #     i+=1
+    #     if is_valid_combination(combination):
+    #         # check for overall time conflicts between classes
+    #         print('checking a schedule...')
+    #         if not any(time_conflicts(s1, s2) for i, s1 in enumerate(combination) for s2 in combination[i+1:]):
+    #             valid_schedules.append(combination)
+    #             print('successful schedule added!')
+    # return valid_schedules
 
 if __name__ == "__main__":
 
-    a = {'starts': ['T 740', 'Th 740', 'F 740'], 'ends': ['T 855', 'Th 855', 'F 855']} 
-    b = {'starts': ['T 570', 'Th 570'], 'ends': ['T 645', 'Th 645']}
-    c = {'starts': ['T 480', 'Th 480', 'F 480'], 'ends': ['T 595', 'Th 595', 'F 595']}
-    d = {'starts': ['M 870', 'W 870', 'Th 870'], 'ends': ['M 985', 'W 985', 'Th 985']}
-    e = {'starts': ['M 1000', 'W 1000', 'Th 1000'], 'ends': ['M 1115', 'W 1115', 'Th 1115']}
-    f = False
-    g = {'starts': ['M 730', 'W 730', 'Th 730'], 'ends': ['M 750', 'W 750', 'Th 750']}
-
-    print(time_conflicts(a, b)) # false
-    print(time_conflicts(b, c)) # true
-    print(time_conflicts(c, d)) # false
-    print(time_conflicts(a,f)) # false
-    print(time_conflicts(a,g)) # true
-
-    # selected_classes = getSelected()
-    # all_classes = []
-    # for i in selected_classes:
-    #     sections = getSections(i)
-    #     all_classes.append(sections)
-    #     print(sections)
+    selected_classes = getSelected()
+    all_classes = []
+    for i in selected_classes:
+        sections = getSections(i)
+        all_classes.append(sections)
+        
+    print(generate_schedules(all_classes))
 
     # x = generate_schedules(all_classes)
     # for i in x:
