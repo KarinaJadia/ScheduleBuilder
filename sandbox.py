@@ -190,7 +190,10 @@ def generate_schedules(classes):
     """
     print('starting validation')
 
-
+    for c in classes:
+        print(c)
+        # print(c['Lecture'] + c['Lab'] + c['Discussion'])
+        # print(c['LSA'])
 
     # all_combinations = product(*[class_sections["Lecture"] + class_sections["Lab"] + class_sections["Discussion"] + class_sections["LSA"] for class_sections in classes])
 
