@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from itertools import product
 
 DATABASE = "test.db"
+all_classes = []
 
 def getSelected(): 
     '''gets the selected classes from the database'''
@@ -36,7 +37,8 @@ def getSections(selected_class):
         "Lecture":[], # must be paired with discussion or lab
         "Discussion":[],
         "Lab":[],
-        "LSA":[] # means it is standalone, no need to take lab/discussion/lecture
+        "LSA":[], # means it is standalone, no need to take lab/discussion/lecture
+        "Links":{} # lecture section: [dis + lab sections]
     }
 
     # parses data
@@ -53,7 +55,7 @@ def getSections(selected_class):
             "Section": section,
             "Type": None,  # Will be updated below
             "Meets": parse_time(meets),
-            "Instructor": instructor
+            "Instructor": instructor,
         }
 
         if type_ == 'DIS':
@@ -62,6 +64,7 @@ def getSections(selected_class):
         elif type_ == 'LEC':
             section_entry["Type"] = "Lecture"
             sections["Lecture"].append(section_entry)
+            sections["Links"][section_entry['Section']] = []
         elif type_ == 'LAB':
             section_entry["Type"] = "Lab"
             sections["Lab"].append(section_entry)
@@ -70,6 +73,25 @@ def getSections(selected_class):
             sections["LSA"].append(section_entry)
 
     return sections
+
+def link_sections(sections):
+    '''links discussions and labs to lectures'''
+    lecs = sections['Lecture']
+    for lec in lecs:
+        print(lec['Class'], lec['Section'])
+        # all_classes[]
+        # crn = lec['CRN']
+        # url = "https://catalog.uconn.edu/course-search/?details&crn=" + crn
+
+        # driver = webdriver.Chrome() # uconn just has to make this extra hard for me
+        # driver.get(url)
+        # driver.implicitly_wait(10)
+        # section_info = driver.find_element(By.XPATH, '/html/body/main/div[2]/div/div[2]/div[13]/div/div/div').text
+        # driver.quit()
+
+        # # split the section info into lines
+        # section_lines = section_info.split("\n")[1:]
+        # print(section_lines)
 
 def to_minutes(t): # helper for parse_time
         hour, minute = map(int, t[:-1].split(':'))
@@ -214,12 +236,13 @@ def generate_schedules(classes):
 if __name__ == "__main__":
 
     selected_classes = getSelected()
-    all_classes = []
     for i in selected_classes:
         sections = getSections(i)
         all_classes.append(sections)
+        link_sections(sections)
         
-    print(generate_schedules(all_classes))
+    # print(generate_schedules(all_classes))
+    print(all_classes)
 
     # x = generate_schedules(all_classes)
     # for i in x:
