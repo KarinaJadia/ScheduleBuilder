@@ -35,10 +35,7 @@ def getSections(selected_class):
     sections = {
         "Class": selected_class,
         "Lecture":[], # must be paired with discussion or lab
-        "Discussion":[],
-        "Lab":[],
-        "LSA":[], # means it is standalone, no need to take lab/discussion/lecture
-        "Links":{} # lecture section: [dis + lab sections]
+        "LSA":[] # means it is standalone, no need to take lab/discussion/lecture
     }
 
     # parses data
@@ -56,42 +53,58 @@ def getSections(selected_class):
             "Type": None,  # Will be updated below
             "Meets": parse_time(meets),
             "Instructor": instructor,
+            "Links": {}
         }
 
-        if type_ == 'DIS':
-            section_entry["Type"] = "Discussion"
-            sections["Discussion"].append(section_entry)
-        elif type_ == 'LEC':
+        if type_ == 'LEC':
             section_entry["Type"] = "Lecture"
+            section_entry["Links"] = link_sections(section_entry["CRN"])
             sections["Lecture"].append(section_entry)
-            sections["Links"][section_entry['Section']] = []
-        elif type_ == 'LAB':
-            section_entry["Type"] = "Lab"
-            sections["Lab"].append(section_entry)
         else:
             section_entry["Type"] = "LSA"
             sections["LSA"].append(section_entry)
 
     return sections
 
-def link_sections(sections):
+def link_sections(crn):
     '''links discussions and labs to lectures'''
-    lecs = sections['Lecture']
-    for lec in lecs:
-        print(lec['Class'], lec['Section'])
-        # all_classes[]
-        # crn = lec['CRN']
-        # url = "https://catalog.uconn.edu/course-search/?details&crn=" + crn
+    # all_classes[]
+    url = "https://catalog.uconn.edu/course-search/?details&crn=" + crn
 
-        # driver = webdriver.Chrome() # uconn just has to make this extra hard for me
-        # driver.get(url)
-        # driver.implicitly_wait(10)
-        # section_info = driver.find_element(By.XPATH, '/html/body/main/div[2]/div/div[2]/div[13]/div/div/div').text
-        # driver.quit()
+    driver = webdriver.Chrome() # uconn just has to make this extra hard for me
+    driver.get(url)
+    driver.implicitly_wait(10)
+    section_info = driver.find_element(By.XPATH, '/html/body/main/div[2]/div/div[2]/div[13]/div/div/div').text
+    driver.quit()
 
-        # # split the section info into lines
-        # section_lines = section_info.split("\n")[1:]
-        # print(section_lines)
+    # split the section info into lines
+    secs = []
+    section_lines = section_info.split("\n")[1:]
+
+    # clearing up list because they did such a fuckass job the data
+    filters = ['CRN:','Section #:', 'Type:', 'Meets:', 'Instructor:']
+    for f in filters:
+        while f in section_lines:
+            section_lines.remove(f)
+
+    for i in range(0, len(section_lines), 5):
+        crn = section_lines[i]
+        section = section_lines[i+1]
+        type_ = section_lines[i+2]
+        meet_time_raw = section_lines[i+3]
+        meets = parse_time(meet_time_raw)
+        professors = section_lines[i+4]
+
+        section_entry = {
+            "CRN": crn,
+            "Section": section,
+            "Type": type_,
+            "Meets": meets,
+            "Instructor": professors
+        }
+        secs.append(section_entry)
+    # print(secs)
+    return secs
 
 def to_minutes(t): # helper for parse_time
         hour, minute = map(int, t[:-1].split(':'))
@@ -239,10 +252,10 @@ if __name__ == "__main__":
     for i in selected_classes:
         sections = getSections(i)
         all_classes.append(sections)
-        link_sections(sections)
+        print(sections)
         
-    # print(generate_schedules(all_classes))
-    print(all_classes)
+    print(generate_schedules(all_classes))
+    # print(all_classes)
 
     # x = generate_schedules(all_classes)
     # for i in x:
