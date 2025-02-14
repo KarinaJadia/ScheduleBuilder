@@ -80,8 +80,8 @@ def link_sections(crn):
     # split the section info into lines
     secs = []
     section_lines = section_info.split("\n")[1:]
-
-    # clearing up list because they did such a fuckass job the data
+    # print(section_lines)
+    # clearing up list because they did such a fuckass job with the data
     filters = ['CRN:','Section #:', 'Type:', 'Meets:', 'Instructor:']
     for f in filters:
         while f in section_lines:
@@ -252,9 +252,9 @@ if __name__ == "__main__":
     for i in selected_classes:
         sections = getSections(i)
         all_classes.append(sections)
-        print(sections)
+        # print(sections)
         
-    print(generate_schedules(all_classes))
+    generate_schedules(all_classes)
     # print(all_classes)
 
     # x = generate_schedules(all_classes)
