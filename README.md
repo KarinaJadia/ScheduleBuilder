@@ -11,4 +11,6 @@ step three: navigate to main.go and start the website in the terminal like so:
 
 step four: search and add classes you want to take
 
-step five: calculate!
+step five: run sandbox.py to populate scheds.txt
+
+step six: tbd...
