@@ -58,7 +58,7 @@ def getSections(selected_class):
 
         if type_ == 'LEC':
             section_entry["Type"] = "Lecture"
-            section_entry["Links"] = link_sections(section_entry["CRN"])
+            section_entry["Links"] = link_sections(section_entry["CRN"], selected_class)
             sections["Lecture"].append(section_entry)
         else:
             section_entry["Type"] = "LSA"
@@ -66,7 +66,7 @@ def getSections(selected_class):
 
     return sections
 
-def link_sections(crn):
+def link_sections(crn, selected_class):
     '''links discussions and labs to lectures'''
     # all_classes[]
     url = "https://catalog.uconn.edu/course-search/?details&crn=" + crn
@@ -96,6 +96,7 @@ def link_sections(crn):
         professors = section_lines[i+4]
 
         section_entry = {
+            "Class": f'{selected_class} {type_}',
             "CRN": crn,
             "Section": section,
             "Type": type_,
