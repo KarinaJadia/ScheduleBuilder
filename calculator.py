@@ -1,4 +1,4 @@
-# when user hits "calculate" button, calculates all possible schedules
+# when user hits "calculate" button after picking classes, calculates all possible schedules
 
 import sqlite3
 from selenium import webdriver
@@ -191,33 +191,6 @@ def time_conflicts(section1, section2): # check if two sections conflict based o
                     return True # conflicts
 
     return False # no conflicts
-
-def generate_schedules(classes):
-    """
-    generates all possible schedules given classes, then passes all possibilities to is_valid_cobination
-    """
-    print('starting validation')
-
-    for c in classes:
-        print(c)
-        # print(c['Lecture'] + c['Lab'] + c['Discussion'])
-        # print(c['LSA'])
-
-    # all_combinations = product(*[class_sections["Lecture"] + class_sections["Lab"] + class_sections["Discussion"] + class_sections["LSA"] for class_sections in classes])
-
-    # valid_schedules = []
-    # i = 1
-    # for combination in all_combinations:
-    #     if i%100 == 0:
-    #         print(f'testing...{i}')
-    #     i+=1
-    #     if is_valid_combination(combination):
-    #         # check for overall time conflicts between classes
-    #         print('checking a schedule...')
-    #         if not any(time_conflicts(s1, s2) for i, s1 in enumerate(combination) for s2 in combination[i+1:]):
-    #             valid_schedules.append(combination)
-    #             print('successful schedule added!')
-    # return valid_schedules
 
 def generate_class_options(class_data):
     options = []
