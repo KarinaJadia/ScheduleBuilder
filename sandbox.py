@@ -4,7 +4,7 @@ import sqlite3
 from selenium import webdriver
 import re # getting a little lost in the sauce with regex
 from selenium.webdriver.common.by import By
-from itertools import product
+import itertools
 
 DATABASE = "test.db"
 all_classes = []
@@ -193,32 +193,6 @@ def time_conflicts(section1, section2): # check if two sections conflict based o
 
     return False # no conflicts
 
-def is_valid_combination(class_schedule):
-    """
-    validate a class schedule:
-    - ensure Lecture is paired with Lab/Discussion if required
-    - allow standalone classes (LSA) but not mixed with Lecture or Lab/Discussion.
-    - check for time conflicts within the class.
-    """
-    lectures = [sec for sec in class_schedule if sec["Type"] == "Lecture"]
-    labs = [sec for sec in class_schedule if sec["Type"] in {"Lab", "Discussion"}]
-    lsa = [sec for sec in class_schedule if sec["Type"] == "LSA"]
-
-    # LSA validation
-    if lsa:
-        # Valid if only LSAs are present and no Lectures or Labs/Discussions
-        return len(lectures) == 0 and len(labs) == 0
-
-    # Lecture + Lab/Discussion validation
-    if lectures and labs:
-        # Check if any Lecture and Lab/Discussion pairing is valid
-        for lecture in lectures:
-            for lab in labs:
-                if not time_conflicts(lecture, lab):
-                    return True  # Valid pairing
-    # If neither condition is met, the combination is invalid
-    return False
-
 def generate_schedules(classes):
     """
     generates all possible schedules given classes, then passes all possibilities to is_valid_cobination
@@ -246,17 +220,86 @@ def generate_schedules(classes):
     #             print('successful schedule added!')
     # return valid_schedules
 
+def generate_class_options(class_data):
+    options = []
+    # Process each Lecture in the class
+    for lecture in class_data.get('Lecture', []):
+        links = lecture.get('Links', [])
+        # Group links by their Type (e.g., LAB, DIS)
+        type_groups = {}
+        for link in links:
+            link_type = link.get('Type', '')
+            if link_type not in type_groups:
+                type_groups[link_type] = []
+            type_groups[link_type].append(link)
+        # Generate combinations for each type group
+        groups = list(type_groups.values())
+        if not groups:  # No linked components
+            options.append([lecture])
+        else:
+            # Generate Cartesian product of all groups
+            for combo in itertools.product(*groups):
+                option = [lecture] + list(combo)
+                options.append(option)
+    # Process each LSA in the class
+    for lsa in class_data.get('LSA', []):
+        options.append([lsa])
+    return options
+
+def generate_all_schedules(all_classes_data):
+    # Generate options for each class
+    all_class_options = []
+    for class_data in all_classes_data:
+        class_options = generate_class_options(class_data)
+        all_class_options.append(class_options)
+    
+    # Generate all possible combinations across classes
+    all_schedules = []
+    for schedule_combination in itertools.product(*all_class_options):
+        # Flatten the combination into a single list of components
+        components = []
+        for option in schedule_combination:
+            components.extend(option)
+        
+        # Check for time conflicts between all pairs of components
+        conflict_found = False
+        for i in range(len(components)):
+            for j in range(i + 1, len(components)):
+                section1 = components[i]
+                section2 = components[j]
+                # Extract meeting times for each section
+                meeting1 = section1.get('Meets', {})
+                meeting2 = section2.get('Meets', {})
+                # Check for conflicts using your time_conflicts function
+                if time_conflicts(meeting1, meeting2):
+                    conflict_found = True
+                    break
+            if conflict_found:
+                break
+        
+        # If no conflicts, add the schedule to the list
+        if not conflict_found:
+            all_schedules.append(components)
+    
+    return all_schedules
+
 if __name__ == "__main__":
 
     selected_classes = getSelected()
     for i in selected_classes:
         sections = getSections(i)
         all_classes.append(sections)
-        # print(sections)
+        print(sections)
         
-    generate_schedules(all_classes)
-    # print(all_classes)
-
+    schedules = generate_all_schedules(all_classes)
+    # print(schedules)
+    with open('scheds.txt', 'w') as f:
+        for i in schedules:
+            # Join the list of strings into a single string
+            f.write("".join([f"{line}\n" for line in i]))
+            f.write('\n')  # Add an extra newline between schedules
+    print('done!')
+    
     # x = generate_schedules(all_classes)
     # for i in x:
     #     print(i)
