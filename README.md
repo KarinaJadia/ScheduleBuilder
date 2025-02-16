@@ -11,6 +11,8 @@ step three: navigate to main.go and start the website in the terminal like so:
 
 step four: search and add classes you want to take
 
-step five: run sandbox.py to populate scheds.txt
+step five: run calculator.py to populate scheds.txt
 
-step six: tbd...
+step six: run calc_dbfier.py to send scheds.txt stuff to database
+
+step seven: tbd...
