@@ -4,6 +4,7 @@ import sqlite3
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import itertools
+import json
 
 DATABASE = "test.db"
 all_classes = []
@@ -157,40 +158,38 @@ def parse_time(meeting_time): # parse meeting time into start and end times eg '
 
     return tots # returns in format {'starts': [M 100, W 100], 'ends': {M 200, W 200} or False
 
-def time_conflicts(section1, section2): # check if two sections conflict based on meeting times (takes meeting times)
+def time_conflicts(section1, section2):
     """
-    takes 2 section meeting times, returns false if no conflicts and true if conflicts
-    make sure to only pass meeting times, so like sections['class']['meeting'] for both
+    Check if two sections conflict based on meeting times.
+    Returns True if there is a conflict, False otherwise.
     """
-    if not section1 or not section2: # if one section does not meet
-        return False # no conflicts
-    
-    for s1st in section1['starts']:
-        s1st = s1st.split() # so it should become ['M', 200]
-        s1st[1] = int(s1st[1])
-        for i, s2en in enumerate(section2['ends']):
-            s2en = s2en.split() # so it should become ['M', 200]
-            s2en[1] = int(s2en[1])
-            if s1st[0] == s2en[0] and s1st[1] < s2en[1]:
-                s2st = section2['starts'][i].split()
-                s2st[1] = int(s2st[1])
-                if s1st[1] > s2st[1]:
-                    return True # conflicts
-                
-    section2, section1 = section1, section2 # i'm lazy
-    for s1st in section1['starts']:
-        s1st = s1st.split() # so it should become ['M', 200]
-        s1st[1] = int(s1st[1])
-        for i, s2en in enumerate(section2['ends']):
-            s2en = s2en.split() # so it should become ['M', 200]
-            s2en[1] = int(s2en[1])
-            if s1st[0] == s2en[0] and s1st[1] < s2en[1]:
-                s2st = section2['starts'][i].split()
-                s2st[1] = int(s2st[1])
-                if s1st[1] > s2st[1]:
-                    return True # conflicts
+    if not section1 or not section2:  # If one section does not meet
+        return False  # No conflicts
 
-    return False # no conflicts
+    # Extract meeting times
+    starts1 = section1['starts']
+    ends1 = section1['ends']
+    starts2 = section2['starts']
+    ends2 = section2['ends']
+
+    # Check for conflicts
+    for i in range(len(starts1)):
+        day1, time1 = starts1[i].split()
+        time1 = int(time1)
+        end1 = int(ends1[i].split()[1])
+
+        for j in range(len(starts2)):
+            day2, time2 = starts2[j].split()
+            time2 = int(time2)
+            end2 = int(ends2[j].split()[1])
+
+            # Check if the days match
+            if day1 == day2:
+                # Check for overlap
+                if not (end1 <= time2 or time1 >= end2):
+                    return True  # Conflict found
+
+    return False  # No conflicts
 
 def generate_class_options(class_data):
     options = []
@@ -265,14 +264,16 @@ if __name__ == "__main__":
         
     schedules = generate_all_schedules(all_classes)
     # print(schedules)
+
+    count = 0
     with open('scheds.txt', 'w') as f:
-        for i in schedules:
-            # Join the list of strings into a single string
-            f.write("".join([f"{line}\n" for line in i]))
-            f.write('\n')  # Add an extra newline between schedules
+        for schedule in schedules:
+            count += 1
+            f.write(f'schedule {count}\n\n')
+            for section in schedule:
+                # create a copy of the section dictionary without the "Links" key
+                filtered_section = {key: value for key, value in section.items() if key != "Links"}
+                # write the filtered section to the file with pretty formatting
+                f.write(json.dumps(filtered_section, indent=4) + "\n")
+            f.write('\n')  # add an extra newline between schedules
     print('done!')
-    
-    # x = generate_schedules(all_classes)
-    # for i in x:
-    #     print(i)
-    #     print()
