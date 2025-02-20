@@ -164,16 +164,16 @@ def time_conflicts(section1, section2):
     Check if two sections conflict based on meeting times.
     Returns True if there is a conflict, False otherwise.
     """
-    if not section1 or not section2:  # If one section does not meet
-        return False  # No conflicts
+    if not section1 or not section2:  # if one section does not meet
+        return False  # no conflicts
 
-    # Extract meeting times
+    # extract meeting times
     starts1 = section1['starts']
     ends1 = section1['ends']
     starts2 = section2['starts']
     ends2 = section2['ends']
 
-    # Check for conflicts
+    # check for conflicts
     for i in range(len(starts1)):
         day1, time1 = starts1[i].split()
         time1 = int(time1)
@@ -184,72 +184,73 @@ def time_conflicts(section1, section2):
             time2 = int(time2)
             end2 = int(ends2[j].split()[1])
 
-            # Check if the days match
+            # check if the days match
             if day1 == day2:
-                # Check for overlap
+                # check for overlap
                 if not (end1 <= time2 or time1 >= end2):
-                    return True  # Conflict found
+                    return True  # conflict found
 
-    return False  # No conflicts
+    return False  # no conflict
 
 def generate_class_options(class_data):
     options = []
-    # Process each Lecture in the class
+    # process each lecture in the class
     for lecture in class_data.get('Lecture', []):
         links = lecture.get('Links', [])
-        # Group links by their Type (e.g., LAB, DIS)
+        # group links by type (lab/dis)
         type_groups = {}
         for link in links:
             link_type = link.get('Type', '')
             if link_type not in type_groups:
                 type_groups[link_type] = []
             type_groups[link_type].append(link)
-        # Generate combinations for each type group
+        # generate combinations for each type group
         groups = list(type_groups.values())
-        if not groups:  # No linked components
+        if not groups:  # no linked components
             options.append([lecture])
         else:
-            # Generate Cartesian product of all groups
+            # cartesian product of all groups
             for combo in itertools.product(*groups):
                 option = [lecture] + list(combo)
                 options.append(option)
-    # Process each LSA in the class
+    # do lsas
     for lsa in class_data.get('LSA', []):
         options.append([lsa])
     return options
 
 def generate_all_schedules(all_classes_data):
-    # Generate options for each class
+    # generate options for each class
     all_class_options = []
     for class_data in all_classes_data:
         class_options = generate_class_options(class_data)
         all_class_options.append(class_options)
     
-    # Generate all possible combinations across classes
+    # cartesian take 2
     all_schedules = []
     for schedule_combination in itertools.product(*all_class_options):
-        # Flatten the combination into a single list of components
+        # turn combination into a single list of components
         components = []
         for option in schedule_combination:
             components.extend(option)
         
-        # Check for time conflicts between all pairs of components
+        # brute force time conflict check on EVERY SINGLE COMBINATION
+        # someone make this more efficient
         conflict_found = False
         for i in range(len(components)):
             for j in range(i + 1, len(components)):
                 section1 = components[i]
                 section2 = components[j]
-                # Extract meeting times for each section
+                # get meeting times for each section
                 meeting1 = section1.get('Meets', {})
                 meeting2 = section2.get('Meets', {})
-                # Check for conflicts using your time_conflicts function
+                # check for conflicts using time_conflicts function
                 if time_conflicts(meeting1, meeting2):
                     conflict_found = True
                     break
             if conflict_found:
                 break
         
-        # If no conflicts, add the schedule to the list
+        # add the schedule to the list
         if not conflict_found:
             all_schedules.append(components)
     
