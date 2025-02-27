@@ -107,6 +107,6 @@ def process_schedule(schedule_id, compound_str, cursor):
         VALUES (?, ?, ?, ?, ?, ?)
     ''', insert_data)
 
-if __name__ == "__main__":
+def main():
     process_schedules()
     print("schedules successfully saved to database!")

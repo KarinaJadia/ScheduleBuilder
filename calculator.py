@@ -6,6 +6,8 @@ from selenium.webdriver.common.by import By
 import itertools
 import json
 
+import calc_dbfier
+
 DATABASE = "test.db"
 all_classes = []
 
@@ -279,3 +281,5 @@ if __name__ == "__main__":
                 f.write(json.dumps(filtered_section, indent=4) + "\n")
             f.write('\n')  # add an extra newline between schedules
     print('done!')
+
+    calc_dbfier.main()
