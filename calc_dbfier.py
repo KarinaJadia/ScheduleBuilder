@@ -5,17 +5,17 @@ from contextlib import closing
 DATABASE = "test.db"
 
 def parse_meets(meets_data):
-    """Convert meets data to a readable time string"""
+    """convert meets data to a readable time string"""
     if isinstance(meets_data, bool) and not meets_data:
-        return None  # Handle 'Meets': false case
+        return None  # handle 'Meets': false case
     
     time_slots = []
     for start, end in zip(meets_data['starts'], meets_data['ends']):
-        # Split day and time components
+        # split day and time components
         start_day, start_time = start.split()
         end_day, end_time = end.split()
         
-        # Convert 3-digit time to proper format (e.g., 755 → 7:55 AM)
+        # convert 3-digit time to proper format (e.g., 755 → 7:55 AM)
         def format_time(time_str):
             hour = int(time_str[:-2]) if len(time_str) > 2 else int(time_str[0])
             mins = time_str[-2:]
@@ -23,17 +23,17 @@ def parse_meets(meets_data):
             if hour > 12: hour -= 12
             return f"{hour}:{mins} {period}"
         
-        # Create time range string
+        # create time range string
         time_slots.append(f"{start_day} {format_time(start_time)}-{format_time(end_time)}")
     
     return ', '.join(time_slots)
 
 def process_schedules():
-    # Connect to SQLite database
+    # connect to SQLite database
     with closing(sqlite3.connect(DATABASE)) as conn:
         cursor = conn.cursor()
         
-        # Create table
+        # create table
         cursor.execute('''DROP TABLE IF EXISTS Schedules''')
         cursor.execute('''
             CREATE TABLE Schedules (
@@ -46,7 +46,7 @@ def process_schedules():
             )
         ''')
         
-        # Process schedules
+        # process schedules
         current_schedule = None
         compound_str = ''
         
@@ -59,14 +59,14 @@ def process_schedules():
                     current_schedule = int(line.strip().split()[1])
                 else:
                     compound_str += line
-            # Process last schedule
+            # process last schedule
             if current_schedule is not None:
                 process_schedule(current_schedule, compound_str, cursor)
         
         conn.commit()
 
 def process_schedule(schedule_id, compound_str, cursor):
-    """Process one schedule's data and insert into database"""
+    """process one schedule's data and insert into database"""
     classes = []
     decoder = json.JSONDecoder()
     pos = 0
@@ -85,10 +85,10 @@ def process_schedule(schedule_id, compound_str, cursor):
         except json.JSONDecodeError:
             break
     
-    # Prepare data for insertion
+    # prepare data for insertion
     insert_data = []
     for cls in classes:
-        # Handle class number (split "PHYS 1501Q LAB" to "PHYS 1501Q")
+        # handles class number (split "PHYS 1501Q LAB" to "PHYS 1501Q")
         class_num = ' '.join(cls['Class'].split()[:2]) if ' ' in cls['Class'] else cls['Class']
         
         insert_data.append((
@@ -100,7 +100,7 @@ def process_schedule(schedule_id, compound_str, cursor):
             cls.get('Instructor', 'TBA')
         ))
     
-    # Batch insert
+    # insert
     cursor.executemany('''
         INSERT INTO Schedules 
         (ScheduleID, ClassNum, ClassType, ClassSection, ClassTime, Professor)
