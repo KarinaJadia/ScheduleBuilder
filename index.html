@@ -21,7 +21,7 @@
         <label for="classes">select a class:</label>
         <select name="classes" id="classes" onchange="addClass()"></select>
     </div>
-    <button id="calculator" onclick="alert('Hello!')">calculate</button>
+    <button id="calculator" onclick="calc_dbfier()">calculate</button>
 
     <p></p>
     <div>
@@ -46,6 +46,15 @@
     </div>
 
     <script>
+        
+    function calc_dbfier() {
+        fetch('/calc_dbfier')
+            .then(response => response.json())
+            .then(data => console.log("Python Output:", data.output))
+            .catch(error => console.error("Error:", error));
+    }
+
+    document.getElementById("calculator").addEventListener("click", calc_dbfier);
         function fetchClasses() { // updates classes based on selected course
             const courseCode = document.getElementById('courses').value; // gets course code eg ACCT
             if (courseCode) {
