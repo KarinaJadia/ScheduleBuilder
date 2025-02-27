@@ -109,4 +109,4 @@ def process_schedule(schedule_id, compound_str, cursor):
 
 if __name__ == "__main__":
     process_schedules()
-    print("Schedules successfully saved to database!")
+    print("schedules successfully saved to database!")
