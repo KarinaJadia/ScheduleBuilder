@@ -29,7 +29,7 @@ type Schedule struct {
     ClassNum     string `json:"ClassNum"`
     ClassType    string `json:"ClassType"`
     ClassSection string `json:"ClassSection"`
-    ClassTime    string `json:"ClassTime"`
+    ClassTime    sql.NullString `json:"ClassTime"`
     Professor    string `json:"Professor"`
 }
 

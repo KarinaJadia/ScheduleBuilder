@@ -48,8 +48,15 @@
     <h1>Schedule Viewer</h1>
     <div class="schedule-container">
         {{range .Schedules}}
-        <tr id="row-{{.ScheduleId}}">
+        <tr id="row-{{.ScheduleID}}">
             <td>{{.ClassNum}}</td><td>{{.ClassNum}}</td><td>{{.ClassType}}</td><td>{{.ClassSection}}</td>
+            <td>
+            {{if .ClassTime.Valid}}
+                {{.ClassTime.String}}
+            {{else}}
+                No Time
+            {{end}}
+            </td>
         </tr>
         {{end}}
         <div class="schedule-navigation">
@@ -60,13 +67,6 @@
 
     <script>
         
-    function calc_dbfier() {
-        fetch('/calc_dbfier')
-            .then(response => response.json())
-            .then(data => console.log("Python Output:", data.output))
-            .catch(error => console.error("Error:", error));
-    }
-
     document.getElementById("calculator").addEventListener("click", calc_dbfier);
         function fetchClasses() { // updates classes based on selected course
             const courseCode = document.getElementById('courses').value; // gets course code eg ACCT
@@ -166,7 +166,6 @@
                     console.error('error deleting class:', error);
                 });
         }
-
     </script>
 </body>
 </html>
