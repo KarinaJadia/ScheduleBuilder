@@ -24,6 +24,15 @@ type SelectedClasses struct {
 	ClassNum string `json:"ClassNum"`
 }
 
+type Schedule struct {
+    ScheduleID   int    `json:"ScheduleID"`
+    ClassNum     string `json:"ClassNum"`
+    ClassType    string `json:"ClassType"`
+    ClassSection string `json:"ClassSection"`
+    ClassTime    string `json:"ClassTime"`
+    Professor    string `json:"Professor"`
+}
+
 // handler function for HTML page
 func handler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "index.html")
@@ -195,6 +204,37 @@ func main() {
 			http.Error(w, "JSON encoding error: "+err.Error(), http.StatusInternalServerError)
 		}
 
+	})
+
+	// handler for displaying schedules
+	http.HandleFunc("/get-schedule", func(w http.ResponseWriter, r *http.Request) {
+		scheduleID := r.URL.Query().Get("scheduleID")
+		if scheduleID == "" {
+			http.Error(w, "Missing scheduleID parameter", http.StatusBadRequest)
+			return
+		}
+	
+		rows, err := db.Query("SELECT * FROM Schedules WHERE ScheduleID = ?", scheduleID)
+		if err != nil {
+			http.Error(w, "Database query error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+	
+		var schedules []Schedule
+		for rows.Next() {
+			var s Schedule
+			if err := rows.Scan(&s.ScheduleID, &s.ClassNum, &s.ClassType, &s.ClassSection, &s.ClassTime, &s.Professor); err != nil {
+				http.Error(w, "Database scan error: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			schedules = append(schedules, s)
+		}
+	
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(schedules); err != nil {
+			http.Error(w, "JSON encoding error: "+err.Error(), http.StatusInternalServerError)
+		}
 	})
 
 	// create server

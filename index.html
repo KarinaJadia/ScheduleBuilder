@@ -45,8 +45,83 @@
         </table>
     </div>
 
+    <h1>Schedule Viewer</h1>
+    <div class="schedule-container">
+        <div id="schedule-content">
+            <!-- Schedule content will be dynamically inserted here -->
+        </div>
+        <div class="schedule-navigation">
+            <button id="prev-schedule">← Previous</button>
+            <button id="next-schedule">Next →</button>
+        </div>
+    </div>
+
     <script>
-        
+        let currentScheduleID = 1; // Start with the first schedule
+
+        // Function to fetch and display a schedule
+        async function fetchSchedule(scheduleID) {
+            const response = await fetch(`/get-schedule?scheduleID=${scheduleID}`);
+            if (!response.ok) {
+                alert("Failed to fetch schedule");
+                return;
+            }
+            const schedules = await response.json();
+
+            // Render the schedule
+            const scheduleContent = document.getElementById('schedule-content');
+            if (schedules.length === 0) {
+                scheduleContent.innerHTML = "<p>No classes found for this schedule.</p>";
+                return;
+            }
+
+            let tableHTML = `
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>Class Number</th>
+                            <th>Type</th>
+                            <th>Section</th>
+                            <th>Time</th>
+                            <th>Professor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            schedules.forEach(schedule => {
+                tableHTML += `
+                    <tr>
+                        <td>${schedule.ClassNum}</td>
+                        <td>${schedule.ClassType}</td>
+                        <td>${schedule.ClassSection}</td>
+                        <td>${schedule.ClassTime}</td>
+                        <td>${schedule.Professor}</td>
+                    </tr>
+                `;
+            });
+            tableHTML += `</tbody></table>`;
+            scheduleContent.innerHTML = tableHTML;
+        }
+
+        // Event listeners for navigation buttons
+        document.getElementById('prev-schedule').addEventListener('click', () => {
+            if (currentScheduleID > 1) {
+                currentScheduleID--;
+                fetchSchedule(currentScheduleID);
+            }
+        });
+
+        document.getElementById('next-schedule').addEventListener('click', () => {
+            currentScheduleID++;
+            fetchSchedule(currentScheduleID);
+        });
+
+        // Load the first schedule on page load
+        fetchSchedule(currentScheduleID);
+    </script>
+
+    <script>
+
     function calc_dbfier() {
         fetch('/calc_dbfier')
             .then(response => response.json())
