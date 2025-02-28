@@ -206,37 +206,6 @@ func main() {
 
 	})
 
-	// handler for displaying schedules
-	http.HandleFunc("/get-schedule", func(w http.ResponseWriter, r *http.Request) {
-		scheduleID := r.URL.Query().Get("scheduleID")
-		if scheduleID == "" {
-			http.Error(w, "Missing scheduleID parameter", http.StatusBadRequest)
-			return
-		}
-	
-		rows, err := db.Query("SELECT * FROM Schedules WHERE ScheduleID = ?", scheduleID)
-		if err != nil {
-			http.Error(w, "Database query error: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
-	
-		var schedules []Schedule
-		for rows.Next() {
-			var s Schedule
-			if err := rows.Scan(&s.ScheduleID, &s.ClassNum, &s.ClassType, &s.ClassSection, &s.ClassTime, &s.Professor); err != nil {
-				http.Error(w, "Database scan error: "+err.Error(), http.StatusInternalServerError)
-				return
-			}
-			schedules = append(schedules, s)
-		}
-	
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(schedules); err != nil {
-			http.Error(w, "JSON encoding error: "+err.Error(), http.StatusInternalServerError)
-		}
-	})
-
 	// create server
 	log.Println("opening website on http://localhost:8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
