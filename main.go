@@ -102,14 +102,33 @@ func main() {
 			selectedClasses = append(selectedClasses, d)
 		}
 
+		rows, err = db.Query("SELECT * FROM Schedules")
+		if err != nil {
+			http.Error(w, "Database query error: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var schedules []Schedule
+		for rows.Next() {
+			var s Schedule
+			if err := rows.Scan(&s.ScheduleID, &s.ClassNum, &s.ClassType, &s.ClassSection, &s.ClassTime, &s.Professor); err != nil {
+				http.Error(w, "Database scan error: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			schedules = append(schedules, s)
+		}	
+
 		data := struct {
 			Courses []Courses
 			Classes []Classes
 			SelectedClasses []SelectedClasses
+			Schedules []Schedule
 		}{
 			Courses: courses,
 			Classes: classes,
 			SelectedClasses: selectedClasses,
+			Schedules: schedules,
 		}
 		
 		if err := tmpl.Execute(w, data); err != nil {

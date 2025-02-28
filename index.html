@@ -45,6 +45,19 @@
         </table>
     </div>
 
+    <h1>Schedule Viewer</h1>
+    <div class="schedule-container">
+        {{range .Schedules}}
+        <tr id="row-{{.ScheduleId}}">
+            <td>{{.ClassNum}}</td><td>{{.ClassNum}}</td><td>{{.ClassType}}</td><td>{{.ClassSection}}</td>
+        </tr>
+        {{end}}
+        <div class="schedule-navigation">
+            <button id="prev-schedule" onclick="backwards()">← Previous</button>
+            <button id="next-schedule" onclick="forwards()">Next →</button>
+        </div>
+    </div>
+
     <script>
         
     function calc_dbfier() {
